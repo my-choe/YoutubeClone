@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+var ffmpeg = require('fluent-ffmpeg');
+
 /* const { Video } = require("../models/Video"); */
+/* const { Subscriber } = require("../models/Subscriber");
+const { auth } = require("../middleware/auth"); */
 
-const { auth } = require("../middleware/auth");
-const multer = require("multer");
-
-// STORAGE MULTER CONFIG
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/')
@@ -24,20 +25,54 @@ var storage = multer.diskStorage({
 
 var upload = multer({ storage: storage }).single("file")
 //=================================
-//             Video
+//             User
 //=================================
 
 router.post("/uploadfiles", (req, res) => {
-
     upload(req, res, err => {
         if (err) {
             return res.json({ success: false, err })
         }
         return res.json({ success: true, filePath: res.req.file.path, fileName: res.req.file.filename })
     })
-
 });
 
+
+router.post("/thumbnail", (req, res) => {
+    // 썸네일 생성 및 비디오 러닝타임 가져오기
+
+
+    let filePath ="";
+    let fileDuration ="";
+    
+    // 비디오 정보 가져오기
+    ffmpeg.ffprobe(req.body.url, function(err, metadata){
+        console.dir(metadata);
+        console.log(metadata.format.duration);
+
+        fileDuration = metadata.format.duration;
+    })
+
+    // 썸네일 생성
+    ffmpeg(req.body.url)
+        .on('filenames', function (filenames) {
+            console.log('Will generate ' + filenames.join(', '))
+            filePath = "uploads/thumbnails/" + filenames[0];
+        })
+        .on('end', function () {
+            console.log('Screenshots taken');
+            return res.json({ success: true, url: filePath, fileDuration: fileDuration})
+        })
+        .screenshots({
+            // Will take screens at 20%, 40%, 60% and 80% of the video
+            count: 3,
+            folder: 'uploads/thumbnails',
+            size:'320x240',
+            // %b input basename ( filename w/o extension )
+            filename:'thumbnail-%b.png'
+        });
+
+});
 
 
 module.exports = router;
