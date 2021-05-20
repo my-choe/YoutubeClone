@@ -86,4 +86,18 @@ router.post("/uploadVideo", (req, res) => {
 });
 
 
+router.get("/getVideos", (req, res) => {
+    // 비디오를 DB에서 가져와 클라이언트에 보낸다.
+    // populate를 해줘야 writer의 모든 정보 가져올 수 있음. 아니면 아이디만 가져오게 됨.
+
+    Video.find()
+        .populate('writer')
+        .exec(( err, videos) => {
+            if(err) return res.status(400).send(err);
+            res.status(200).json({ success: true, videos })
+        })
+    
+});
+
+
 module.exports = router;

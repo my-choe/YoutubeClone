@@ -55,7 +55,6 @@ function VideoUploadPage(props) {
         Axios.post('/api/video/uploadfiles', formData, config)
             .then(response => {
                 if(response.data.success){
-                    console.log(response.data);
 
                     let variable = {
                         url: response.data.filePath,
