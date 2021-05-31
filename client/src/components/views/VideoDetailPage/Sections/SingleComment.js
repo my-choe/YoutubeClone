@@ -16,17 +16,17 @@ function SingleComment(props) {
     }
 
     const onHandleChange = (e) => {
-        setCommentValue(e.currentTarget.CommentValue);
+        setCommentValue(e.currentTarget.value);
     }
     
     const onSubmit = (e) => {
         e.preventDefault();
 
         const variables = {
-            content: CommentValue,
             writer: user.userData._id,
             postId: props.postId,
-            responseTo: props.comment._id
+            responseTo: props.comment._id,
+            content: CommentValue,
         }
 
         Axios.post('/api/comment/saveComment', variables )
@@ -34,6 +34,7 @@ function SingleComment(props) {
             if(response.data.success){
                 console.log(response.data.result)
                 setCommentValue("")
+                setOpenReply(false)
                 props.refreshFunction(response.data.result)
             }else{
                 alert('코멘트 저장 실패!')
