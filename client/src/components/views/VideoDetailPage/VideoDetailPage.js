@@ -10,6 +10,8 @@ function VideoDetailPage(props) {
     const videoId = props.match.params.videoId
     const variable = { videoId: videoId }
     const [VideoDetail, setVideoDtail] = useState([])
+    const [Comments, setComments] = useState([])
+
     useEffect(() => {
         Axios.post('/api/video/getVideoDetail', variable)
          .then(response => {
@@ -19,7 +21,22 @@ function VideoDetailPage(props) {
                  alert('비디오 정보 가져오기 실패!')
              }
          })
+
+         Axios.post('/api/comment/getComments', variable)
+         .then(response => {
+             if(response.data.success) {
+                setComments(response.data.comments)
+             } else {
+                 alert('코멘트 정보 가져오기 실패!')
+             }
+         })
+
     }, [])
+
+    // 댓글, 대댓글 작성시 refresh
+    const refreshFunction = (newComment) => {
+        setComments(Comments.concat(newComment));
+    }
 
     // 랜딩 전에 Avatar 정보 불러오기때문에 조건문 걸어줌
     if(VideoDetail.writer){
@@ -47,7 +64,7 @@ function VideoDetailPage(props) {
                             </List.Item>
 
                             { /* Comment */}
-                            <Comment postId={videoId}/>
+                            <Comment refreshFunction={refreshFunction} commentLists={Comments} postId={videoId}/>
                         </div>
 
                     </Col>
