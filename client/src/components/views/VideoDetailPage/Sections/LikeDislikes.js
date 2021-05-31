@@ -60,6 +60,82 @@ function LikeDislikes(props) {
         })
     }, [])
 
+    const onLike = () => {
+        if(LikeAction === null) {
+            Axios.post('/api/like/upLike', variable)
+            .then(response => {
+                if(response.data.success) {
+                    setLikes( Likes + 1)
+                    setLikeAction('liked')
+
+                    if(DislikeAction !== null){
+                        setDislikeAction(null)
+                        setDislikes( Dislikes -1)
+                    }
+                } else {
+                    alert("좋아요 버튼 기능 실패!")
+                }
+            })
+        } else {
+
+            Axios.post('/api/like/unLike', variable)
+            .then(response => {
+                if(response.data.success) {
+                    setLikes( Likes - 1)
+                    setLikeAction(null)
+                } else {
+                    alert("좋아요 버튼 취소 기능 실패!")
+                }
+            })
+
+        }
+    }
+
+
+
+    const onDislike = () => {
+
+        if (DislikeAction !== null) {
+
+            Axios.post('/api/like/unDisLike', variable)
+                .then(response => {
+                    if (response.data.success) {
+
+                        setDislikes(Dislikes - 1)
+                        setDislikeAction(null)
+
+                    } else {
+                        alert('Failed to decrease dislike')
+                    }
+                })
+
+        } else {
+
+            Axios.post('/api/like/upDisLike', variable)
+                .then(response => {
+                    if (response.data.success) {
+
+                        setDislikes(Dislikes + 1)
+                        setDislikeAction('disliked')
+
+                        //If dislike button is already clicked
+                        if(LikeAction !== null ) {
+                            setLikeAction(null)
+                            setLikes(Likes - 1)
+                        }
+
+                    } else {
+                        alert('Failed to increase dislike')
+                    }
+                })
+
+
+        }
+
+
+    }
+
+
 
     return (
         <div>
@@ -67,7 +143,7 @@ function LikeDislikes(props) {
                 <Tooltip title="like">
                     <Icon type="like"
                           theme={LikeAction === 'liked'? 'filled' : 'outlined'}
-                          onClick
+                          onClick={onLike}
                     />
                 </Tooltip>
                 <span style={{ paddingLeft: '5px', paddingRight: '15px', cursor: 'auto'}}> {Likes} </span>
@@ -76,7 +152,7 @@ function LikeDislikes(props) {
                 <Tooltip title="Dislike">
                     <Icon type="dislike"
                           theme={DislikeAction === 'disliked'? 'filled' : 'outlined'}
-                          onClick
+                          onClick={onDislike}
                     />
                 </Tooltip>
                 <span style={{ paddingLeft: '5px', paddingRight: '15px', cursor: 'auto'}}> {Dislikes} </span>
